@@ -1,0 +1,61 @@
+name: BUILD AUR
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '* 22 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Prepare Arch Linux
+        run: bash $GITHUB_WORKSPACE/ci/init.sh
+
+      - name: Get cache key
+        id: get-date
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+        shell: bash
+
+      - name: Prepare cache
+        uses: actions/cache@v2
+        with:
+          path: /home/aur-build/.cache/pikaur/pkg
+          key: ${{ runner.os }}-${{ hashFiles('**/*') }}-${{ steps.get-date.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-${{ hashFiles('**/*') }}-
+            ${{ runner.os }}-
+
+      - name: Fix permisson
+        run: |
+          mkdir -p /home/aur-build/.cache/pikaur/{build,pkg}
+          chmod -R a+rwx /home/aur-build/.cache/pikaur/{build,pkg} $PWD
+
+      - name: Build
+        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/update_all.zsh
+
+      # Deprecated cause I have 'Deploy to server'
+      #
+      # - name: Clean old release
+      #   uses: ame-yu/action-delete-latest-release@v2
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Publish
+      #   uses: ncipollo/release-action@v1.6.1
+      #   with:
+      #     allowUpdates: true
+      #     tag: "packages"
+      #     artifacts: "/home/aur-build/.cache/pikaur/pkg/*.xz"
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to server
+        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/deploy.zsh "${{ secrets.DEPLOY_KEY }}"

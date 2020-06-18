@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+REPO_NAME=CoolMan
+
+REPO_PATH=~/.cache/aur_repo
+
+CF_PROXY=cool.man.workers.dev

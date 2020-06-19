@@ -2,12 +2,14 @@
 
 PROJECT_ROOT=${0:A:h}/..
 
+eval "$1"
+
 function init_environment() {
-  cat > ~/.makepkg.conf <<'EOF'
+  cat > ~/.makepkg.conf <<EOF
 CFLAGS="-march=skylake -Os -pipe -fno-plt"
 CXXFLAGS="-march=skylake -Os -pipe -fno-plt"
-MAKEFLAGS="-j$(nproc)"
-PACKAGER="Aloxaf <aloxafx@gmail.com>"
+MAKEFLAGS="-j\$(nproc)"
+PACKAGER="$GPGKEY"
 EOF
 
   cat > /tmp/sudo <<'EOF'
@@ -23,25 +25,25 @@ EOF
   export PATH=/tmp:$PATH
 }
 
+function build_packages() {
+  sudo echo "Test sudo"
+
+  for package in $PROJECT_ROOT/packages/*; do
+    echo "Building ${package:t}"
+    if [[ -f $package/build.zsh ]]; then
+      source $package/build.zsh
+    else
+      if [[ ! -f $package/PKGBUILD ]]; then
+        git clone https://aur.archlinux.org/${package:t}.git /tmp/${package:t}
+      else
+        cp -r $package /tmp/
+      fi
+      echo Y | pikaur -P --noedit /tmp/${package:t}/PKGBUILD
+    fi
+  done
+}
+
 init_environment
 
-sudo echo "Test sudo"
+build_packages
 
-for package in $PROJECT_ROOT/packages/*; do
-  echo "Building ${package:t}"
-  if [[ -f $package/build.zsh ]]; then
-    source $package/build.zsh
-  else
-    if [[ ! -f $package/PKGBUILD ]]; then
-      git clone https://aur.archlinux.org/${package:t}.git /tmp/${package:t}
-    else
-      cp -r $package /tmp/
-    fi
-    echo Y | pikaur -P --noedit /tmp/${package:t}/PKGBUILD
-  fi
-done
-
-# TODO: 需要删包的时候怎么办
-paccache -rvk1 -c ~/.cache/pikaur/pkg
-
-repo-add ~/.cache/pikaur/pkg/aloxaf.db.tar.gz ~/.cache/pikaur/pkg/*.xz

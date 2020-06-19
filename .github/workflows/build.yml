@@ -5,7 +5,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: '* 22 * * *'
+    - cron: '0 22 * * *'
 
 jobs:
   build:
@@ -25,6 +25,12 @@ jobs:
           echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
         shell: bash
 
+      - name: Import GPG
+        uses: crazy-max/ghaction-import-gpg@v2
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+
       - name: Prepare cache
         uses: actions/cache@v2
         with:
@@ -36,11 +42,13 @@ jobs:
 
       - name: Fix permisson
         run: |
+          cp -r /github/home/.gnupg /home/aur-build/
           mkdir -p /home/aur-build/.cache/pikaur/{build,pkg}
+          chown aur-build /home/aur-build/.gnupg
           chmod -R a+rwx /home/aur-build/.cache/pikaur/{build,pkg} $PWD
 
       - name: Build
-        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/update_all.zsh
+        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/update_all.zsh "${{ secrets.INIT }}"
 
       # Deprecated cause I have 'Deploy to server'
       #
@@ -56,6 +64,8 @@ jobs:
       #     tag: "packages"
       #     artifacts: "/home/aur-build/.cache/pikaur/pkg/*.xz"
       #     token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sign package
+        run: zsh $GITHUB_WORKSPACE/ci/sign_package.zsh "${{ secrets.INIT }}"
 
       - name: Deploy to server
-        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/deploy.zsh "${{ secrets.DEPLOY_KEY }}"
+        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/deploy.zsh "${{ secrets.INIT }}" "${{ secrets.DEPLOY_KEY }}"

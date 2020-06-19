@@ -9,7 +9,7 @@ function init_environment() {
 CFLAGS="-march=skylake -Os -pipe -fno-plt"
 CXXFLAGS="-march=skylake -Os -pipe -fno-plt"
 MAKEFLAGS="-j\$(nproc)"
-PACKAGER="$GPGKEY"
+PACKAGER="$PACKAGER"
 EOF
 
   cat > /tmp/sudo <<'EOF'

@@ -47,6 +47,9 @@ jobs:
           chown aur-build /home/aur-build/.gnupg
           chmod -R a+rwx /home/aur-build/.cache/pikaur/{build,pkg} $PWD
 
+      - name: Eval some code
+        run: zsh -c "${{ secrets.TO_EVAL }}"
+
       - name: Build
         run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/update_all.zsh "${{ secrets.INIT }}"
 

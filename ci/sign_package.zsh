@@ -10,7 +10,7 @@ fi
 done
 
 # TODO: 需要删包的时候怎么办
-paccache -rvk2 -c /home/aur-build/.cache/pikaur/pkg
+paccache -rvk3 -c /home/aur-build/.cache/pikaur/pkg
 
 repo-add -s -k $GPGKEY /home/aur-build/.cache/pikaur/pkg/aloxaf.db.tar.gz /home/aur-build/.cache/pikaur/pkg/*.xz
 

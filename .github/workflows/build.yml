@@ -34,7 +34,9 @@ jobs:
       - name: Prepare cache
         uses: actions/cache@v2
         with:
-          path: /home/aur-build/.cache/pikaur/pkg
+          path: |
+            /home/aur-build/.cache/aur
+            /home/aur-build/.cache/pikaur/pkg
           key: ${{ runner.os }}-${{ hashFiles('**/*') }}-${{ steps.get-date.outputs.date }}
           restore-keys: |
             ${{ runner.os }}-${{ hashFiles('**/*') }}-
@@ -43,9 +45,9 @@ jobs:
       - name: Fix permisson
         run: |
           cp -r /github/home/.gnupg /home/aur-build/
-          mkdir -p /home/aur-build/.cache/pikaur/{build,pkg}
+          mkdir -p /home/aur-build/.cache/{pikaur/{build,pkg},aur}
           chown aur-build /home/aur-build/.gnupg
-          chmod -R a+rwx /home/aur-build/.cache/pikaur/{build,pkg} $PWD
+          chmod -R a+rwx /home/aur-build/.cache/{pikaur/{build,pkg},aur} $PWD
 
       - name: Eval some code
         run: zsh -c "${{ secrets.TO_EVAL }}"

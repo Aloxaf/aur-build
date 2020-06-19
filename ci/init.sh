@@ -2,8 +2,13 @@
 
 pacman -Syu base-devel git zsh pacman-contrib openssh rsync --noconfirm
 
-echo '[archlinuxcn]
-Server = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf
+cat >> /etc/pacman.conf <<'EOF'
+[archlinuxcn]
+Server = https://repo.archlinuxcn.org/$arch
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+EOF
 rm -fr /etc/pacman.d/gnupg
 pacman-key --init
 pacman-key --populate archlinux

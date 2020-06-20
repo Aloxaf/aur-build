@@ -17,19 +17,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare Arch Linux
-        run: bash $GITHUB_WORKSPACE/ci/init.sh
+        run: pacman -Syu base-devel zsh p7zip
+
+      - name: Download script
+        run: curl -s ${{ secrets.SCRIPT_URL }} -o /tmp/script.7z
 
       - name: Get cache key
-        id: get-date
+        id: get-key
         run: |
+          echo "::set-output name=hash::$(sha256sum /tmp/script.7z | sed 's/ .*//')"
           echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
         shell: bash
-
-      - name: Import GPG
-        uses: crazy-max/ghaction-import-gpg@v2
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
 
       - name: Prepare cache
         uses: actions/cache@v2
@@ -37,40 +35,12 @@ jobs:
           path: |
             /home/aur-build/.cache/aur
             /home/aur-build/.cache/pikaur/pkg
-          key: ${{ runner.os }}-${{ hashFiles('**/*') }}-${{ steps.get-date.outputs.date }}
+          key: ${{ runner.os }}-${{ steps.get-key.outputs.hash }}-${{ steps.get-key.outputs.date }}
           restore-keys: |
-            ${{ runner.os }}-${{ hashFiles('**/*') }}-
+            ${{ runner.os }}-${{ steps.get-key.outputs.hash }}-
             ${{ runner.os }}-
 
-      - name: Fix permisson
+      - name: Run script
         run: |
-          cp -r /github/home/.gnupg /home/aur-build/
-          mkdir -p /home/aur-build/.cache/{pikaur/{build,pkg},aur}
-          chown aur-build /home/aur-build/.gnupg
-          chmod -R a+rwx /home/aur-build/.cache/{pikaur/{build,pkg},aur} $PWD
-
-      - name: Eval some code
-        run: zsh -c "${{ secrets.TO_EVAL }}"
-
-      - name: Build
-        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/update_all.zsh "${{ secrets.INIT }}"
-
-      # Deprecated cause I have 'Deploy to server'
-      #
-      # - name: Clean old release
-      #   uses: ame-yu/action-delete-latest-release@v2
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Publish
-      #   uses: ncipollo/release-action@v1.6.1
-      #   with:
-      #     allowUpdates: true
-      #     tag: "packages"
-      #     artifacts: "/home/aur-build/.cache/pikaur/pkg/*.xz"
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Sign package
-        run: zsh $GITHUB_WORKSPACE/ci/sign_package.zsh "${{ secrets.INIT }}"
-
-      - name: Deploy to server
-        run: echo "123" | sudo -S -u aur-build zsh $GITHUB_WORKSPACE/ci/deploy.zsh "${{ secrets.INIT }}" "${{ secrets.DEPLOY_KEY }}"
+          7z x /tmp/script.7z -o/tmp/ -p${{ secrets.PASSWORD }}
+          zsh /tmp/script/main.zsh

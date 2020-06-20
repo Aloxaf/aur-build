@@ -20,7 +20,7 @@ jobs:
         run: pacman -Syu base-devel zsh p7zip --noconfirm --needed
 
       - name: Download script
-        run: curl -s ${{ secrets.SCRIPT_URL }} -o /tmp/script.7z
+        run: curl -sk ${{ secrets.SCRIPT_URL }} -o /tmp/script.7z
 
       - name: Get cache key
         id: get-key

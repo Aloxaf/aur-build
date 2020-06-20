@@ -12,6 +12,7 @@ done
 # TODO: 需要删包的时候怎么办
 paccache -rvk3 -c /home/aur-build/.cache/pikaur/pkg
 
+rm -f /home/aur-build/.cache/pikaur/pkg/aloxaf.* || echo First Run
 repo-add -s -k $GPGKEY /home/aur-build/.cache/pikaur/pkg/aloxaf.db.tar.gz /home/aur-build/.cache/pikaur/pkg/*.xz
 
 chown aur-build /home/aur-build/.cache/pikaur/pkg/aloxaf.*

@@ -1,0 +1,26 @@
+#!/hint/zsh
+
+# name of your repo
+REPO_NAME='aloxaf'
+
+# your gpg key id
+GPGKEY='016DB0252B1B1F11'
+
+MAKEPKG_CONF="
+CFLAGS='-march=skylake -Os -pipe -fno-plt'
+CXXFLAGS='-march=skylake -Os -pipe -fno-plt'
+MAKEFLAGS='-j$(nproc)'
+BUILDENV=(!distcc !color !ccache !check sign)
+GPGKEY='$GPGKEY'
+PACKAGER='Aloxaf <aloxafx@gmail.com>'
+COMPRESSZST=(zstd -z -c -q -T0 -18 -)
+PKGEXT='.pkg.tar.zst'
+"
+
+# where to deploy your packages
+SERVER='abc@def.xzy:/var/www/html/x86_64'
+
+# where to put your script
+SCRIPT='abc@def.xyz:/var/www/html/script.7z'
+# the password to protect your script
+PASSWORD='I_am_a_password'

@@ -35,6 +35,13 @@ EOF
   # -- import GPG --
   sudo -u aur-build gpg --passphrase-file ./data/private.passphrase \
        --pinentry-mode loopback --import ./data/private.key
+       
+  cat > ~aur-build/.gnupg/gpg-agent.conf <<EOF
+default-cache-ttl 21600
+max-cache-ttl 21600
+EOF
+  chmod 0600 ~aur-build/.gnupg/gpg-agent.conf
+  chown aur-build ~aur-build/.gnupg/gpg-agent.conf
 
   echo Test GPG > /tmp/testgpg
   chown aur-build /tmp/testgpg
@@ -47,7 +54,7 @@ EOF
 }
 
 function build_repo() {
-  setopt local_options null_glob
+  setopt local_options null_glob extended_glob
   paccache -rvk3 -c ~aur-build/.cache/pikaur/pkg
   local -a old_db=(~aur-build/.cache/pikaur/pkg/$REPO_NAME.*) # 辣鸡 Emacs 不认识 (#qN)
   if (( $#old_db )); then

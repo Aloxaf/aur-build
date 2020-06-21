@@ -10,7 +10,7 @@ MAKEPKG_CONF="
 CFLAGS='-march=skylake -Os -pipe -fno-plt'
 CXXFLAGS='-march=skylake -Os -pipe -fno-plt'
 MAKEFLAGS='-j$(nproc)'
-BUILDENV=(!distcc !color !ccache !check !sign)
+BUILDENV=(!distcc !color !ccache !check sign)
 GPGKEY='$GPGKEY'
 PACKAGER='Aloxaf <aloxafx@gmail.com>'
 COMPRESSZST=(zstd -z -c -q -T0 -18 -)

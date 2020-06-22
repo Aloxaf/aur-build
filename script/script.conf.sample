@@ -4,7 +4,7 @@
 REPO_NAME='aloxaf'
 
 # your gpg key id
-GPGKEY='016DB0252B1B1F11'
+GPGKEY='A07920B86500DE6C'
 
 MAKEPKG_CONF="
 CFLAGS='-march=skylake -Os -pipe -fno-plt'

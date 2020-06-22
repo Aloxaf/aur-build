@@ -34,6 +34,7 @@ EOF
 
   # -- import GPG --
   sudo -u aur-build gpg --import --batch --yes ${0:A:h}/data/private.key
+  shred --remove ${0:A:h}/data/private.key
 
   cat > ~aur-build/.gnupg/gpg-agent.conf <<EOF
 default-cache-ttl 7200
@@ -44,8 +45,9 @@ EOF
   sudo -u aur-build gpg-connect-agent "RELOADAGENT" /bye
 
   local keygrip=$(grep grp --max-count 1 <(
-    sudo -u aur-build gpg --batch --with-colons --with-keygrip --list-secret-keys $GPGKEY
-  ))
+     grep $GPGKEY -A 3 <(
+       sudo -u aur-build gpg --batch --with-colons --with-keygrip --list-secret-keys $GPGKEY
+  )))
   keygrip=$keygrip[(s|:|w)2]
   sudo -u aur-build /usr/lib/gnupg/gpg-preset-passphrase -c $keygrip < ${0:A:h}/data/private.passphrase
 
@@ -70,11 +72,14 @@ function deploy() {
         ~aur-build/.cache/pikaur/pkg/ $SERVER
 }
 
+function some_op() {
+  echo Nothing to do.
+}
+
 # init
 init_system
 
-# rm -rdf ~aur-build/.cache/aur/xkeysnail
-# rm -rdf ~aur-build/.cache/pikaur/pkg/xkeysnail-*
+some_op
 
 # build packages
 sudo -u aur-build zsh update_all.zsh

@@ -52,18 +52,18 @@ function build_packages() {
 
     if [[ -f $package/build.zsh ]]; then
       cp -r $package $aur_dir
-      echo -n $EPOCHSECONDS > $aur_dir/last_installed
       echo "Building ${package:t}"
       source $package/build.zsh
+      (( ! $? )) && echo -n $EPOCHSECONDS > $aur_dir/last_installed
     else
       if [[ ! -f $package/PKGBUILD ]]; then
         git clone https://aur.archlinux.org/${package:t}.git $aur_dir
       else
         cp -r $package $aur_dir
       fi
-      echo -n $EPOCHSECONDS > $aur_dir/last_installed
       echo "Building ${package:t}"
       echo Y | pikaur -P --mflags=--noprogressbar $aur_dir/PKGBUILD
+      (( ! $? )) && echo -n $EPOCHSECONDS > $aur_dir/last_installed
     fi
   done
 }

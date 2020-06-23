@@ -58,11 +58,7 @@ EOF
 function build_repo() {
   setopt local_options null_glob extended_glob
   paccache -rvk3 -c ~aur-build/.cache/pikaur/pkg
-  local -a old_db=(~aur-build/.cache/pikaur/pkg/$REPO_NAME.*) # 辣鸡 Emacs 不认识 (#qN)
-  if (( $#old_db )); then
-     rm -f $old_db
-  fi
-  sudo -u aur-build repo-add -s -k $GPGKEY \
+  sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
        ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz \
        ~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig
 }
@@ -72,8 +68,19 @@ function deploy() {
         ~aur-build/.cache/pikaur/pkg/ $SERVER
 }
 
+function remove_package() {
+  setopt local_options null_glob
+  rm -rdf ~aur-build/.cache/aur/$1
+  for file in ~aur-build/.cache/pikaur/pkg/$1-*.pkg.tar.*; do
+    if [[ ${file:e} != "sig" ]]; then
+      sudo -u aur-build repo-remove -s -k $GPGKEY $file
+    fi
+    rm -f $file
+  done
+}
+
 function some_op() {
-  echo Nothing to do.
+  echo no.
 }
 
 # init

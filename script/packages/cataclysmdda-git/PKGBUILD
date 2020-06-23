@@ -59,8 +59,8 @@ package() {
   #   RELEASE=1 ZLEVELS=1 USE_XDG_DIR=1 LANGUAGES="zh_CN" \
   #   install
 
-  make PREFIX="$pkgdir/usr" \
-    RELEASE=1 ZLEVELS=1 USE_XDG_DIR=1 TILES=1 SOUND=1 LANGUAGES="zh_CN" \
+  make PREFIX="$pkgdir/usr" RELEASE=1 ZLEVELS=1 USE_XDG_DIR=1 TILES=1 SOUND=1 LANGUAGES="zh_CN" \
+    VERSION=$(sed 's/.r/-/; s/.g/-g/' <<< $pkgver) \
     install
 
   # Icon

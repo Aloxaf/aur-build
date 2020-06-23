@@ -6,6 +6,7 @@ PROJECT_ROOT=${0:A:h}
 mkdir -p ~/.cache/aur
 
 function need_update() {
+  setopt local_options extended_glob
   # 如果目录不存在，则需要构建
   if [[ ! -d $aur_dir ]]; then
     return 0
@@ -20,8 +21,8 @@ function need_update() {
     ret=$?
   elif [[ -f PKGBUILD || -f build.zsh ]]; then
     # 如果是本地包，则检测文件是否变化
-    local old=$(sha256sum *(.) | sed -E 's/ +.*//' | sha256sum)
-    local new=$(sha256sum $PROJECT_ROOT/packages/$1/*(.) | sed -E 's/ +.*//' | sha256sum)
+    local old=$(sha256sum *~last_installed | sed -E 's/ +.*//' | sha256sum)
+    local new=$(sha256sum $PROJECT_ROOT/packages/$1/* | sed -E 's/ +.*//' | sha256sum)
     [[ $old != $new ]]
     ret=$?
   fi
@@ -51,12 +52,13 @@ function build_packages() {
     if ! need_update ${package:t}; then
       continue
     fi
+    
+    echo "Building ${package:t}"
 
     [[ -d $aur_dir ]] && rm -rdf $aur_dir
 
     if [[ -f $package/build.zsh ]]; then
       cp -r $package $aur_dir
-      echo "Building ${package:t}"
       source $package/build.zsh
       ret=$?
     else
@@ -65,7 +67,6 @@ function build_packages() {
       else
         cp -r $package $aur_dir
       fi
-      echo "Building ${package:t}"
       echo Y | pikaur -P --mflags=--noprogressbar $aur_dir/PKGBUILD
       ret=$?
     fi

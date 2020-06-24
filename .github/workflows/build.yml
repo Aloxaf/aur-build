@@ -23,7 +23,7 @@ jobs:
         id: get-key
         run: |
           echo "::set-output name=hash::$(sha256sum /tmp/script.7z | sed 's/ .*//')"
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d%H")"
         shell: bash
 
       - name: Prepare cache

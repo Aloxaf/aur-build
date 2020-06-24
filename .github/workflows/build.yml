@@ -13,9 +13,6 @@ jobs:
     container:
       image: archlinux:latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
       - name: Prepare Arch Linux
         run: pacman -Syu base-devel zsh p7zip --noconfirm --needed --noprogressbar
 

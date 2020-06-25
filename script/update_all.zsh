@@ -5,6 +5,10 @@ zmodload zsh/datetime
 PROJECT_ROOT=${0:A:h}
 mkdir -p ~/.cache/aur
 
+function LOG() {
+  echo "[LOG] $1"
+}
+
 function need_update() {
   setopt local_options extended_glob
   # 如果目录不存在，则需要构建
@@ -49,11 +53,12 @@ function build_packages() {
     local -a packages=(~/.cache/pikaur/pkg/*)
 
     # 先检测是否需要更新，如果需要的话，直接删掉目录重建
+    LOG "Checking update for ${package:t}"
     if ! need_update ${package:t}; then
       continue
     fi
-    
-    echo "Building ${package:t}"
+
+    echo "Updating ${package:t}"
 
     [[ -d $aur_dir ]] && rm -rdf $aur_dir
 
@@ -73,9 +78,16 @@ function build_packages() {
     # 确认成功构建后更新时间戳
     if (( ! $ret )); then
       local -a new_packages=(~/.cache/pikaur/pkg/*)
-      if (( $#new_packages > $#packages )); then
+      if (( $#new_packages > $#packages )) || [[ ! -f $aur_dir/last_installed ]] ; then
+        LOG "Updated"
         echo -n $EPOCHSECONDS > $aur_dir/last_installed
+      else
+        LOG "Nothing to do"
+        # 如果本次没有更新的话，则只推后 8 小时
+        echo -n $(( $(<$aur_dir/last_installed) + 8 * 3600 )) > $aur_dir/last_installed
       fi
+    else
+      LOG "Failed to Update"
     fi
   done
 }

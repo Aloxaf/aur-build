@@ -4,8 +4,13 @@ cd ${0:A:h}
 
 source ${0:A:h}/script.conf
 
+function LOG() {
+  echo "[LOG] $1"
+}
+
 function init_system() {
   # -- init pacman --
+  LOG 'Initing pacman'
   cat >> /etc/pacman.conf <<'EOF'
 [archlinuxcn]
 Server = https://repo.archlinuxcn.org/$arch
@@ -14,6 +19,7 @@ Server = https://repo.archlinuxcn.org/$arch
 Include = /etc/pacman.d/mirrorlist
 EOF
 
+  LOG 'Installing packages'
   rm -fr /etc/pacman.d/gnupg
   pacman-key --init
   pacman-key --populate archlinux
@@ -33,6 +39,7 @@ EOF
   chown -R aur-build:aur-build ~aur-build ~aur-build/.cache/{pikaur/{build,pkg},aur}
 
   # -- import GPG --
+  LOG 'Importing GPG'
   sudo -u aur-build gpg --import --batch --yes ${0:A:h}/data/private.key
   shred --remove ${0:A:h}/data/private.key
 
@@ -58,17 +65,26 @@ EOF
 function build_repo() {
   setopt local_options null_glob extended_glob
   paccache -rvk3 -c ~aur-build/.cache/pikaur/pkg
-  sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
-       ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz \
-       ~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig
+  local -a new_packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
+  local -a new_packages=(${new_packages:|packages})
+  if (( $#new_packages )); then
+    LOG "There are $#new_packages new packages"
+    sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
+         ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz \
+         $new_packages
+  else
+    LOG "No new package"
+  fi
 }
 
 function deploy() {
+  LOG "Uploading to server"
   rsync -avzr --delete -e 'ssh -i ./data/deploy_key -o StrictHostKeyChecking=no' \
         ~aur-build/.cache/pikaur/pkg/ $SERVER
 }
 
 function remove_package() {
+  LOG "Revoming package $1"
   setopt local_options null_glob
   rm -rdf ~aur-build/.cache/aur/$1
   for file in ~aur-build/.cache/pikaur/pkg/$1-*.pkg.tar.*; do
@@ -79,14 +95,17 @@ function remove_package() {
   done
 }
 
-function some_op() {
-  echo no.
+function prebuild_hook() {
+  setopt local_options null_glob extended_glob
+  typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
 }
+
+typeset -g -a packages=()
 
 # init
 init_system
 
-some_op
+prebuild_hook
 
 # build packages
 sudo -u aur-build zsh update_all.zsh

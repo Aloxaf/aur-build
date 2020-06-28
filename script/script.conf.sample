@@ -7,8 +7,8 @@ REPO_NAME='aloxaf'
 GPGKEY='A07920B86500DE6C'
 
 MAKEPKG_CONF="
-CFLAGS='-march=skylake -Os -pipe -fno-plt'
-CXXFLAGS='-march=skylake -Os -pipe -fno-plt'
+CFLAGS='-march=skylake -O2 -pipe -fno-plt'
+CXXFLAGS='-march=skylake -O2 -pipe -fno-plt'
 MAKEFLAGS='-j$(nproc)'
 BUILDENV=(!distcc !color !ccache !check sign)
 GPGKEY='$GPGKEY'

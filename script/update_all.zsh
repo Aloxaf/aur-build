@@ -32,11 +32,11 @@ function need_update() {
   fi
   popd
   # 最后对 -git 包以及自定义构建脚本再检测一次
-  # 对于它们来说 12 小时之后强制更新一次
+  # 对于它们来说 22 小时之后强制更新一次
   if (( $ret )); then
     if [[ $1 == *-git || -f $aur_dir/build.zsh ]]; then
       if [[ ! -f $aur_dir/last_installed ]] ||
-           (( $EPOCHSECONDS - $(<$aur_dir/last_installed) >= 12 * 3600 )); then
+           (( $EPOCHSECONDS - $(<$aur_dir/last_installed) >= 22 * 3600 )); then
         return 0
       else
         return 1

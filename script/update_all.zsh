@@ -90,6 +90,7 @@ function build_packages() {
       LOG "Failed to Update"
     fi
   done
+  # TODO: 构建失败后该怎样做？
 }
 
 function init() {

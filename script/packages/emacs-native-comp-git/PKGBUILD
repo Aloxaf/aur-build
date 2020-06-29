@@ -66,7 +66,7 @@ MAGICK=           # ImageMagick 7 support. Deprecated (read the logs).
                   #are doing.
                   # -->>If you just *believe* you need it, you don't.<<--
 NOGZ="YES"        # Don't compress .el files.
-FAST_BOOT="YES"   # Only native-compile the bare minimum. Intended for use with
+FAST_BOOT=        # Only native-compile the bare minimum. Intended for use with
                   # deferred compilation to native-compile on-demand at runtime.
 PROFILING=        # Enable gprof profiling support.
 ################################################################################
@@ -273,9 +273,9 @@ fi
   # are reusing your src directory!
   #
   if [[ $FAST_BOOT == "YES" ]]; then
-    make NATIVE_FAST_BOOT=1
+    make bootstrap NATIVE_FAST_BOOT=1
   else
-    make
+    make bootstrap
   fi
 
   # You may need to run this if 'loaddefs.el' files become corrupt.

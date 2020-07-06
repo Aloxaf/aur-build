@@ -1,5 +1,10 @@
 #!/usr/bin/env zsh
 
+function TRAPZERR() {
+  LOG 'Non zero exit code detected. Exiting...'
+  exit
+}
+
 zmodload zsh/datetime
 
 PROJECT_ROOT=${0:A:h}
@@ -21,22 +26,20 @@ function need_update() {
   if [[ -d .git ]]; then
     # 如果是 AUR 包，则检测上游是否更新
     git remote update
-    [[ $(git rev-parse @) != $(git rev-parse @{u}) ]]
-    ret=$?
+    [[ $(git rev-parse @) != $(git rev-parse @{u}) ]] || ret=1
   elif [[ -f PKGBUILD || -f build.zsh ]]; then
     # 如果是本地包，则检测文件是否变化
     local old=$(sha256sum *~last_installed | sed -E 's/ +.*//' | sha256sum)
     local new=$(sha256sum $PROJECT_ROOT/packages/$1/* | sed -E 's/ +.*//' | sha256sum)
-    [[ $old != $new ]]
-    ret=$?
+    [[ $old != $new ]] || ret=1
   fi
   popd
   # 最后对 -git 包以及自定义构建脚本再检测一次
-  # 对于它们来说 22 小时之后强制更新一次
+  # 对于它们来说 24 小时之后强制更新一次
   if (( $ret )); then
     if [[ $1 == *-git || -f $aur_dir/build.zsh ]]; then
       if [[ ! -f $aur_dir/last_installed ]] ||
-           (( $EPOCHSECONDS - $(<$aur_dir/last_installed) >= 22 * 3600 )); then
+           (( $EPOCHSECONDS - $(<$aur_dir/last_installed) >= 24 * 3600 )); then
         return 0
       else
         return 1
@@ -64,16 +67,14 @@ function build_packages() {
 
     if [[ -f $package/build.zsh ]]; then
       cp -r $package $aur_dir
-      source $package/build.zsh
-      ret=$?
+      source $package/build.zsh || ret=1
     else
       if [[ ! -f $package/PKGBUILD ]]; then
         git clone https://aur.archlinux.org/${package:t}.git $aur_dir
       else
         cp -r $package $aur_dir
       fi
-      echo Y | pikaur -P --mflags=--noprogressbar $aur_dir/PKGBUILD
-      ret=$?
+      echo Y | pikaur -P --mflags=--noprogressbar $aur_dir/PKGBUILD || ret=1
     fi
     # 确认成功构建后更新时间戳
     if (( ! $ret )); then

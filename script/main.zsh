@@ -1,5 +1,10 @@
 #!/usr/bin/env zsh
 
+function TRAPZERR() {
+  LOG 'Non zero exit code detected. Exiting...'
+  exit
+}
+
 cd ${0:A:h}
 
 source ${0:A:h}/script.conf

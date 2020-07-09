@@ -69,7 +69,7 @@ EOF
 
 function build_repo() {
   setopt local_options null_glob extended_glob
-  paccache -rvk3 -c ~aur-build/.cache/pikaur/pkg
+  paccache -rvk1 -c ~aur-build/.cache/pikaur/pkg
   local -a new_packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
   local -a new_packages=(${new_packages:|packages})
   if (( $#new_packages )); then
@@ -91,11 +91,9 @@ function deploy() {
 function remove_package() {
   LOG "Revoming package $1"
   setopt local_options null_glob
-  rm -rdf ~aur-build/.cache/aur/$1
+  [[ -d ~aur-build/.cache/aur/$1 ]] && rm -rdf ~aur-build/.cache/aur/$1
+  sudo -u aur-build repo-remove -s -k $GPGKEY ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz $1
   for file in ~aur-build/.cache/pikaur/pkg/$1-*.pkg.tar.*; do
-    if [[ ${file:e} != "sig" ]]; then
-      sudo -u aur-build repo-remove -s -k $GPGKEY $file
-    fi
     rm -f $file
   done
 }
@@ -103,6 +101,7 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
+  # remove_package xxx
 }
 
 typeset -g -a packages=()
@@ -118,4 +117,3 @@ sudo -u aur-build zsh update_all.zsh
 build_repo
 
 deploy
-

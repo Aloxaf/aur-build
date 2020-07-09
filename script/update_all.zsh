@@ -123,6 +123,7 @@ EOF
   chmod +x /tmp/pacman
 
   export PATH=/tmp:$PATH
+  export RUSTFLAGS='-C target-cpu=skylake'
 }
 
 init

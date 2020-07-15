@@ -92,7 +92,8 @@ function remove_package() {
   LOG "Revoming package $1"
   setopt local_options null_glob
   [[ -d ~aur-build/.cache/aur/$1 ]] && rm -rdf ~aur-build/.cache/aur/$1
-  sudo -u aur-build repo-remove -s -k $GPGKEY ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz $1
+  sudo -u aur-build repo-remove -s -k $GPGKEY ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz $1 \
+    || LOG "Cannot found $1 in database"
   for file in ~aur-build/.cache/pikaur/pkg/$1-*.pkg.tar.*; do
     rm -f $file
   done
@@ -101,7 +102,8 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
-  # remove_package xxx
+  # remove_package emacs-native-comp-git
+  # remove_package libgccjit
 }
 
 typeset -g -a packages=()

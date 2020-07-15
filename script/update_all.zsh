@@ -14,6 +14,8 @@ function LOG() {
   echo "[LOG] $1"
 }
 
+# TODO: 使用 pacman -Ss "^(${(j:|:)${(f)$(pactree -d 1 -l PACKAGE)}})\$" | grep -oP '\w+/\w+ [^ ]+-\d+'
+# 记录当前依赖？
 function need_update() {
   setopt local_options extended_glob
   # 如果目录不存在，则需要构建

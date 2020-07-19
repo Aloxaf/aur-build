@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
 
 function TRAPZERR() {
-  LOG 'Non zero exit code detected. Exiting...'
-  exit
+  local ret=$?
+  LOG "Non zero exit code($ret) detected. Exiting..."
+  exit $ret
 }
 
 cd ${0:A:h}
@@ -63,7 +64,7 @@ EOF
   keygrip=$keygrip[(s|:|w)2]
   sudo -u aur-build /usr/lib/gnupg/gpg-preset-passphrase -c $keygrip < ${0:A:h}/data/private.passphrase
 
-  pacman-key --recv-keys $GPGKEY
+  pacman-key --recv-keys $GPGKEY --keyserver hkp://ipv4.pool.sks-keyservers.net:11371
   pacman-key --lsign-key $GPGKEY
 }
 

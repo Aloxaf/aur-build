@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
 
 function TRAPZERR() {
-  LOG 'Non zero exit code detected. Exiting...'
-  exit
+  local ret=$?
+  LOG "Non zero exit code($ret) detected. Exiting..."
+  exit $ret
 }
 
 zmodload zsh/datetime

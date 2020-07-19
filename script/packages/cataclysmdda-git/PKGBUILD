@@ -5,7 +5,7 @@
 # Contributor: Klemen Košir <klemen913@gmail.com>
 
 pkgname=cataclysm-dda-git
-pkgver=0.E.r3394.g4f89139636
+pkgver=0.E.r3464.g5a9cc55961
 _pkgver=0.E
 _offset=7382
 pkgrel=1
@@ -39,6 +39,7 @@ pkgver() {
 
 build() {
   cd "$srcdir/Cataclysm-DDA-master"
+  sed -iE 's/(relic_procgen_data::type val);/\1 = relic_procgen_data::type::last;/' src/relic.cpp
   sed -iE 's/.*OTHERS \+= -ma.*/  OTHERS += -march=skylake/' Makefile
   # make PREFIX=/usr RELEASE=1 USE_XDG_DIR=1 LANGUAGES="zh_CN" \
   #   ASTYLE=0 LINTJSON=0 RUNTESTS=0 LTO=1

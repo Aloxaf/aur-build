@@ -17,9 +17,13 @@ function LOG() {
 function init_system() {
   # -- init pacman --
   LOG 'Initing pacman'
-  cat >> /etc/pacman.conf <<'EOF'
+  cat >> /etc/pacman.conf <<EOF
+[$REPO_NAME]
+Server = file:///home/aur-build/.cache/pikaur/pkg
+SigLevel = Optional TrustAll
+
 [archlinuxcn]
-Server = https://repo.archlinuxcn.org/$arch
+Server = https://repo.archlinuxcn.org/\$arch
 
 [multilib]
 Include = /etc/pacman.d/mirrorlist
@@ -29,6 +33,8 @@ EOF
   rm -fr /etc/pacman.d/gnupg
   pacman-key --init
   pacman-key --populate archlinux
+  pacman-key --recv-keys $GPGKEY --keyserver hkp://ipv4.pool.sks-keyservers.net:11371
+  pacman-key --lsign-key $GPGKEY
   pacman -Syu archlinuxcn-keyring --noconfirm --noprogressbar
   pacman -Syu git pacman-contrib openssh rsync pikaur --noconfirm --needed --noprogressbar
 
@@ -63,9 +69,6 @@ EOF
   )))
   keygrip=$keygrip[(s|:|w)2]
   sudo -u aur-build /usr/lib/gnupg/gpg-preset-passphrase -c $keygrip < ${0:A:h}/data/private.passphrase
-
-  pacman-key --recv-keys $GPGKEY --keyserver hkp://ipv4.pool.sks-keyservers.net:11371
-  pacman-key --lsign-key $GPGKEY
 }
 
 function build_repo() {
@@ -103,8 +106,7 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
-  # remove_package emacs-native-comp-git
-  # remove_package libgccjit
+  # remove_package cataclysm-dda-git
 }
 
 typeset -g -a packages=()

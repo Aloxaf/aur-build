@@ -98,7 +98,7 @@ function build_packages() {
 }
 
 function init() {
-  mkdir -p ~/.config
+  mkdir -p ~/.config ~/.cargo
   cat >> ~/.config/pikaur.conf <<EOF
 [sync]
 [build]
@@ -124,9 +124,15 @@ else
 fi
 EOF
   chmod +x /tmp/pacman
+  cat > ~/.cargo/config <<EOF
+[build]
+rustflags = [ "-Ctarget-cpu=skylake" ]
+
+[profile.release]
+lto = true
+EOF
 
   export PATH=/tmp:$PATH
-  export RUSTFLAGS='-C target-cpu=skylake'
 }
 
 init

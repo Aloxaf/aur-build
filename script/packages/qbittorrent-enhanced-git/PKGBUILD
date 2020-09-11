@@ -13,7 +13,7 @@ makedepends=('boost' 'git' 'qt5-tools')
 optdepends=('python: needed for torrent search tab')
 conflicts=('qbittorrent')
 provides=('qbittorrent')
-source=("${pkgname%-*}::git+https://github.com/Aloxaf/qBittorrent-Enhanced-Edition.git")
+source=("${pkgname%-*}::git+https://github.com/Aloxaf/qBittorrent-Enhanced-Edition.git#branch=custom")
 sha256sums=('SKIP')
 
 pkgver() {
@@ -27,7 +27,6 @@ pkgver() {
 
 build() {
   cd ${pkgname%-*}
-  git checkout origin/custom
 
   # tell qmake not to break makepkg's debug/!strip options
   export QBT_ADD_CONFIG='nostrip'

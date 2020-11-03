@@ -71,8 +71,16 @@ EOF
   sudo -u aur-build /usr/lib/gnupg/gpg-preset-passphrase -c $keygrip < ${0:A:h}/data/private.passphrase
 }
 
+function current_package_list() {
+  LOG "Current package list"
+  for i in ~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig; do
+    LOG "=> $i"
+  done
+}
+
 function build_repo() {
   setopt local_options null_glob extended_glob
+  current_package_list
   paccache -rvk1 -c ~aur-build/.cache/pikaur/pkg
   local -a new_packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
   local -a new_packages=(${new_packages:|packages})
@@ -106,7 +114,7 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
-  # remove_package cataclysm-dda-git
+  # remove_package emacs-native-comp-git
 }
 
 typeset -g -a packages=()

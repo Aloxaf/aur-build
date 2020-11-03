@@ -36,7 +36,7 @@ CHECK=            # Run tests. May fail, this is developement after all.
 CLANG=            # Use clang.
 LTO=              # Enable link-time optimization. Not that experimental anymore.
                   # Seems fixed in GCC, so I've reenabled binutils support, please
-                  # report any bug, to make it use clang by default again.
+		  # report any bug, to make it use clang by default again.
 CLI=              # CLI only binary.
 NOTKIT=           # Use no toolkit widgets. Like B&W Twm (001d sk00l).
 LUCID=            # Use the lucid, a.k.a athena, toolkit. Like XEmacs, sorta.
@@ -57,13 +57,13 @@ CAIRO="YES"       # GOOD NEWS! No longer experimental and fully supported.
                   # This is now, along with harfbuzz, the prefered font
                   # and text shaping engine.
                   # If using GTK+, you'll get printing for free.
-XWIDGETS="YES"    # Use GTK+ widgets pulled from webkit2gtk. Usable.
+XWIDGETS=         # Use GTK+ widgets pulled from webkit2gtk. Usable.
 DOCS_HTML=        # Generate and install html documentation.
 DOCS_PDF=         # Generate and install pdf documentation.
 MAGICK=           # ImageMagick 7 support. Deprecated (read the logs).
                   # ImageMagick, like flash, is a bug ridden pest that 
-                  # won't die;  yet it is useful if you know what you 
-                  #are doing.
+		  # won't die;  yet it is useful if you know what you 
+		  #are doing.
                   # -->>If you just *believe* you need it, you don't.<<--
 NOGZ="YES"        # Don't compress .el files.
 FAST_BOOT=        # Only native-compile the bare minimum. Intended for use with
@@ -73,19 +73,19 @@ PROFILING=        # Enable gprof profiling support.
 
 ################################################################################
 pkgname="emacs-native-comp-git"
-pkgver=28.0.50.141945
+pkgver=28.0.50.144241
 pkgrel=1
 pkgdesc="GNU Emacs. Development native-comp branch."
 arch=('x86_64' )
 url="http://www.gnu.org/software/emacs/"
 license=('GPL3' )
+options=('debug' '!strip')
 depends=('alsa-lib' 'gnutls' 'libxml2' 'jansson' 'libotf' 'harfbuzz' 'gpm' 'libgccjit')
 makedepends=('git')
 provides=('emacs' 'emacs-seq')
 conflicts=('emacs' 'emacs26-git' 'emacs-27-git' 'emacs-git' 'emacs-seq')
 replaces=('emacs26-git' 'emacs27-git' 'emacs-git' 'emacs-seq')
-source=("emacs-git::git://github.com/emacs-mirror/emacs.git#branch=feature/native-comp")
-# source=("emacs-git::git://git.savannah.gnu.org/emacs.git#branch=feature/native-comp")
+source=("emacs-git::git://git.savannah.gnu.org/emacs.git#branch=feature/native-comp")
 # If Savannah access is blocked for reasons, use Github instead.
 # Edit the config file of your local repo copy as well.
 #source=("emacs-git::git://github.com/emacs-mirror/emacs.git")
@@ -93,6 +93,9 @@ md5sums=('SKIP')
 ################################################################################
 
 ################################################################################
+
+CFLAGS+=" -g"
+CXXFLAGS+=" -g"
 
 if [[ $LTO == "YES" ]]; then
   CFLAGS+=" -flto"
@@ -274,9 +277,9 @@ fi
   # are reusing your src directory!
   #
   if [[ $FAST_BOOT == "YES" ]]; then
-    make bootstrap NATIVE_FAST_BOOT=1
+    make NATIVE_FAST_BOOT=1
   else
-    make bootstrap
+    make NATIVE_FULL_AOT=1
   fi
 
   # You may need to run this if 'loaddefs.el' files become corrupt.

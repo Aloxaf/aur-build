@@ -18,7 +18,7 @@ function LOG() {
 # TODO: 使用 pacman -Ss "^(${(j:|:)${(f)$(pactree -d 1 -l PACKAGE)}})\$" | grep -oP '\w+/\w+ [^ ]+-\d+'
 # 记录当前依赖？
 function need_update() {
-  setopt local_options extended_glob
+  setopt local_options extended_glob glob_dots
   # 如果目录不存在，则需要构建
   if [[ ! -d $aur_dir ]]; then
     return 0

@@ -114,9 +114,7 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
-  # remove_package xkeysnail
-  # remove_package ptpython
-  # remove_package python-inotify-simple
+  # remove_package cataclysm-dda-git
 }
 
 typeset -g -a packages=()

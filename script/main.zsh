@@ -29,6 +29,11 @@ Server = https://repo.archlinuxcn.org/\$arch
 Include = /etc/pacman.d/mirrorlist
 EOF
 
+  if [[ ! -d ~aur-build/.cache/pikaur/pkg ]]; then
+    sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
+         ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz
+  fi
+
   LOG 'Installing packages'
   rm -fr /etc/pacman.d/gnupg
   pacman-key --init

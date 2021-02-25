@@ -15,7 +15,6 @@ function LOG() {
 }
 
 function init_system() {
-  # -- init pacman --
   LOG 'Initing pacman'
   cat >> /etc/pacman.conf <<EOF
 [$REPO_NAME]
@@ -28,38 +27,24 @@ Server = https://repo.archlinuxcn.org/\$arch
 [multilib]
 Include = /etc/pacman.d/mirrorlist
 EOF
+  print $MAKEPKG_CONF >> /etc/makepkg.conf
 
-  if [[ ! -d ~aur-build/.cache/pikaur/pkg ]]; then
-    sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
-         ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz
-  fi
+  LOG "Initing user"
+  useradd --create-home aur-build
+  printf "123\n123" | passwd aur-build
+  print "aur-build ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+  chown -R aur-build:aur-build ~aur-build
 
-  LOG 'Installing packages'
+  LOG "Initing GPG"
   rm -fr /etc/pacman.d/gnupg
   pacman-key --init
   pacman-key --populate archlinux
   pacman-key --recv-keys $GPGKEY --keyserver hkp://ipv4.pool.sks-keyservers.net:11371
   pacman-key --lsign-key $GPGKEY
-  pacman -Syu archlinuxcn-keyring --noconfirm --noprogressbar
-  pacman -Syu git pacman-contrib openssh rsync pikaur --noconfirm --needed --noprogressbar
 
-  # -- init makepkg --
-  print $MAKEPKG_CONF >> /etc/makepkg.conf
-
-  # -- init user --
-  useradd --create-home aur-build
-  printf "123\n123" | passwd aur-build
-  print "aur-build ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-  # -- fix permission --
-  mkdir -p ~aur-build/.cache/{pikaur/{build,pkg},aur}
-  chown -R aur-build:aur-build ~aur-build ~aur-build/.cache/{pikaur/{build,pkg},aur}
-
-  # -- import GPG --
-  LOG 'Importing GPG'
+  LOG "Importing GPG"
   sudo -u aur-build gpg --import --batch --yes ${0:A:h}/data/private.key
   shred --remove ${0:A:h}/data/private.key
-
   cat > ~aur-build/.gnupg/gpg-agent.conf <<EOF
 default-cache-ttl 7200
 max-cache-ttl 31536000
@@ -74,6 +59,18 @@ EOF
   )))
   keygrip=$keygrip[(s|:|w)2]
   sudo -u aur-build /usr/lib/gnupg/gpg-preset-passphrase -c $keygrip < ${0:A:h}/data/private.passphrase
+
+  LOG "Initing repo"
+  mkdir -p ~aur-build/.cache/{pikaur/{build,pkg},aur}
+  chown -R aur-build:aur-build ~aur-build/.cache/{pikaur/{build,pkg},aur}
+  if [[ ! -f ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz ]]; then
+    sudo -u aur-build repo-add -n -p -s -k $GPGKEY \
+         ~aur-build/.cache/pikaur/pkg/$REPO_NAME.db.tar.gz
+  fi
+
+  LOG 'Installing packages'
+  pacman -Syu archlinuxcn-keyring --noconfirm --noprogressbar
+  pacman -Syu git pacman-contrib openssh rsync pikaur --noconfirm --needed --noprogressbar
 }
 
 function current_package_list() {

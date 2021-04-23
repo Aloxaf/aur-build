@@ -17,10 +17,13 @@ function LOG() {
 
 # TODO: 使用 pacman -Ss "^(${(j:|:)${(f)$(pactree -d 1 -l PACKAGE)}})\$" | grep -oP '\w+/\w+ [^ ]+-\d+'
 # 记录当前依赖？
+# 检测某个包是否需要更新
+# 需要则返回 0
 function need_update() {
   setopt local_options extended_glob glob_dots
   # 如果目录不存在，则需要构建
   if [[ ! -d $aur_dir ]]; then
+    LOG "Need to update this new package"
     return 0
   fi
 
@@ -29,12 +32,18 @@ function need_update() {
   if [[ -d .git ]]; then
     # 如果是 AUR 包，则检测上游是否更新
     git remote update
-    [[ $(git rev-parse @) != $(git rev-parse @{u}) ]] || ret=1
+    if [[ $(git rev-parse @) == $(git rev-parse @{u}) ]]; then
+      LOG "No need to update this AUR package"
+      ret=1
+    fi
   elif [[ -f PKGBUILD || -f build.zsh ]]; then
     # 如果是本地包，则检测文件是否变化
-    local old=$(sha256sum *~last_installed | sed -E 's/ +.*//' | sha256sum)
+    local old=$(sha256sum *~last_installed~last_installed.txt~.SRCINFO | sed -E 's/ +.*//' | sha256sum)
     local new=$(sha256sum $PROJECT_ROOT/packages/$1/* | sed -E 's/ +.*//' | sha256sum)
-    [[ $old != $new ]] || ret=1
+    if [[ $old == $new ]]; then
+      LOG "No need to update this local package"
+      ret=1
+    fi
   fi
   popd
   # 最后对 -git 包以及自定义构建脚本再检测一次
@@ -43,8 +52,10 @@ function need_update() {
     if [[ $1 == *-git || -f $aur_dir/build.zsh ]]; then
       if [[ ! -f $aur_dir/last_installed ]] ||
            (( $EPOCHSECONDS - $(<$aur_dir/last_installed) >= 24 * 3600 )); then
+        LOG "Need to update this git package"
         return 0
       else
+        LOG "No need to update this git package"
         return 1
       fi
     fi
@@ -64,7 +75,7 @@ function build_packages() {
       continue
     fi
 
-    echo "Updating ${package:t}"
+    LOG "Updating ${package:t}"
 
     [[ -d $aur_dir ]] && rm -rdf $aur_dir
 
@@ -83,7 +94,7 @@ function build_packages() {
     if (( ! $ret )); then
       local -a new_packages=(~/.cache/pikaur/pkg/*)
       if (( $#new_packages > $#packages )) || [[ ! -f $aur_dir/last_installed ]] ; then
-        LOG "Updated"
+        LOG "Finish update ${package:t}"
         echo -n $EPOCHSECONDS > $aur_dir/last_installed
       else
         LOG "Nothing to do"

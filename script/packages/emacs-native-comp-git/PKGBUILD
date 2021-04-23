@@ -211,7 +211,7 @@ build() {
 # Good luck!
    --without-gconf
    --without-gsettings
-   --with-nativecomp
+   --with-native-compilation
   )
 
 ################################################################################

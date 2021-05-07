@@ -7,7 +7,6 @@
 pkgname=cataclysm-dda-git
 pkgver=0.E.r3464.g5a9cc55961
 _pkgver=0.E
-_offset=7382
 pkgrel=1
 pkgdesc="A post-apocalyptic roguelike."
 #url="http://cataclysmrl.blogspot.com/"
@@ -18,7 +17,7 @@ arch=('i686' 'x86_64')
 license=("CCPL:by-sa")
 conflicts=('cataclysm-dda' 'cataclysm-dda-ncurses' 'cataclysm-dda-tiles')
 depends=('ncurses')
-makedepends=('sdl2_image' 'sdl2_ttf' 'sdl2_mixer' 'freetype2' 'git' 'jq')
+makedepends=('sdl2_image' 'sdl2_ttf' 'sdl2_mixer' 'freetype2' 'git')
 optdepends=('sdl2_image: for tiles'
             'sdl2_ttf: for tiles'
             'freetype2: for tiles'
@@ -26,19 +25,22 @@ optdepends=('sdl2_image: for tiles'
 # source=("$pkgname"::'git://github.com/CleverRaven/Cataclysm-DDA.git#branch=master')
 # The git repo is more than a GB
 # so download a snapshot while waiting for shallow clone support in makepkg
-source=("https://github.com/CleverRaven/Cataclysm-DDA/archive/master.zip")
-md5sums=('SKIP')
+# source=("https://github.com/CleverRaven/Cataclysm-DDA/archive/master.zip")
+# md5sums=('SKIP')
+
+prepare() {
+  cd $srcdir
+  git clone --filter=tree:0 https://github.com/CleverRaven/Cataclysm-DDA
+}
 
 pkgver() {
-  local tag=$(curl --silent "https://api.github.com/repos/CleverRaven/Cataclysm-DDA/tags" | \
-    jq --raw-output '[ .[] | select( .name | contains("cdda-jenkins-b") ) ] | .[0] | .name')
-  local commit=$(curl --silent "https://api.github.com/repos/CleverRaven/Cataclysm-DDA/commits" | \
-    jq --raw-output ".[0] | .sha")
-  echo ${_pkgver}-$[${tag#*b}-${_offset}]-g${commit:0:10} | sed 's/-/.r/; s/-/./g'
+  local count=$(git rev-list --count 0.E..HEAD)
+  local commit=$(git log --format=%H -n 1)
+  echo ${_pkgver}-$count-g${commit:0:10} | sed 's/-/.r/; s/-/./g'
 }
 
 build() {
-  cd "$srcdir/Cataclysm-DDA-master"
+  cd "$srcdir/Cataclysm-DDA"
   sed -iE 's/.*OTHERS \+= -ma.*/  OTHERS += -march=skylake/' Makefile
   # make PREFIX=/usr RELEASE=1 USE_XDG_DIR=1 LANGUAGES="zh_CN" \
   #   ASTYLE=0 LINTJSON=0 RUNTESTS=0 LTO=1
@@ -52,7 +54,7 @@ build() {
 }
 
 package() {
-  cd "$srcdir/Cataclysm-DDA-master"
+  cd "$srcdir/Cataclysm-DDA"
 
   # no DESTDIR
   # make PREFIX="$pkgdir/usr" \

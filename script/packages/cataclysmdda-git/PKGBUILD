@@ -28,12 +28,14 @@ optdepends=('sdl2_image: for tiles'
 # source=("https://github.com/CleverRaven/Cataclysm-DDA/archive/master.zip")
 # md5sums=('SKIP')
 
-prepare() {
-  cd $srcdir
-  git clone --filter=tree:0 https://github.com/CleverRaven/Cataclysm-DDA
-}
-
 pkgver() {
+  # 辣鸡 pikaur，本来应该放到 prepare 的，但是 pikaur 貌似加了 --noextract
+  cd "$srcdir"
+  if [[ ! -d Cataclysm-DDA ]]; then
+    git clone --filter=tree:0 https://github.com/CleverRaven/Cataclysm-DDA
+  fi
+  cd "$srcdir/Cataclysm-DDA"
+
   local count=$(git rev-list --count 0.E..HEAD)
   local commit=$(git log --format=%H -n 1)
   echo ${_pkgver}-$count-g${commit:0:10} | sed 's/-/.r/; s/-/./g'

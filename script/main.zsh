@@ -39,7 +39,7 @@ EOF
   rm -fr /etc/pacman.d/gnupg
   pacman-key --init
   pacman-key --populate archlinux
-  pacman-key --recv-keys $GPGKEY --keyserver hkp://ipv4.pool.sks-keyservers.net:11371
+  pacman-key --add ${0:A:h}/data/private.key
   pacman-key --lsign-key $GPGKEY
 
   LOG "Importing GPG"
@@ -116,7 +116,8 @@ function remove_package() {
 function prebuild_hook() {
   setopt local_options null_glob extended_glob
   typeset -g -a packages=(~aur-build/.cache/pikaur/pkg/*.pkg.tar.*~*.sig)
-  # remove_package cataclysm-dda-git
+  # remove_package libgccjit
+  # remove_package emacs-native-comp-git
 }
 
 typeset -g -a packages=()

@@ -140,7 +140,7 @@ And you also need a subkey of your GPG key.
 
     gpg --keyserver hkp://keyserver.ubuntu.com --send-keys YOUR_GPG_KEY_ID
 
-#### GitHub Repository
+### GitHub Repository
 
 You can directly fork the aur-build repository and change it.
 
@@ -278,10 +278,10 @@ And add the following to www.conf
         # repo is the subdir you want to store your ArchLinux repository, if you don't want to use dir under root dir to store them, delete the follwing module. But you nned add the conent to the previous location module.
         
             location /repo/ { 
-                   autoindex on;
-    	           autoindex_exact_size off;
-                   autoindex_localtime on;
-    	           root /usr/share/nginx/html;
+                    autoindex on;
+                    autoindex_exact_size off;
+                    autoindex_localtime on;
+                    root /usr/share/nginx/html;
             }  
     }
 

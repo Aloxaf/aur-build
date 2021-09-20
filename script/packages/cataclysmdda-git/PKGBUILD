@@ -5,8 +5,8 @@
 # Contributor: Klemen Košir <klemen913@gmail.com>
 
 pkgname=cataclysm-dda-git
-pkgver=0.E.r3464.g5a9cc55961
-_pkgver=0.E
+pkgver=0.F.r2788.gc5df995449
+_pkgver=0.F
 pkgrel=1
 pkgdesc="A post-apocalyptic roguelike."
 #url="http://cataclysmrl.blogspot.com/"
@@ -36,14 +36,14 @@ pkgver() {
   fi
   cd "$srcdir/Cataclysm-DDA"
 
-  local count=$(git rev-list --count 0.E..HEAD)
+  local count=$(git rev-list --count 0.F..HEAD)
   local commit=$(git log --format=%H -n 1)
   echo ${_pkgver}-$count-g${commit:0:10} | sed 's/-/.r/; s/-/./g'
 }
 
 build() {
   cd "$srcdir/Cataclysm-DDA"
-  sed -iE 's/.*OTHERS \+= -ma.*/  OTHERS += -march=skylake/' Makefile
+  sed -i -E 's/.*OTHERS \+= -ma.*/  OTHERS += -march=tigerlake/' Makefile
   # make PREFIX=/usr RELEASE=1 USE_XDG_DIR=1 LANGUAGES="zh_CN" \
   #   ASTYLE=0 LINTJSON=0 RUNTESTS=0 LTO=1
   make PREFIX=/usr RELEASE=1 USE_XDG_DIR=1 TILES=1 SOUND=1 LANGUAGES="zh_CN" \

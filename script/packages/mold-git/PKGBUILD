@@ -1,30 +1,30 @@
 pkgname=mold-git
-pkgver=r2185.16ba588
+pkgver=r2562.6319135
 pkgrel=1
-pkgdesc='Fast linker'
+pkgdesc="Fast linker"
 arch=(x86_64)
-url='https://github.com/rui314/mold'
-license=('unknown')
-depends=(mimalloc xxhash)
+url="https://github.com/rui314/mold"
+license=("unknown")
+depends=(xxhash mimalloc gcc-libs openssl zlib)
 makedepends=(clang cmake git)
-source=("git+$url")
-sha256sums=('SKIP')
+source=("mold::git+https://github.com/rui314/mold")
+sha256sums=("SKIP")
+reponame="mold"
 
 pkgver() {
-  cd mold
-  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-}
-
-prepare() {
-  cd mold
-  git submodule update --init
+	cd $srcdir/$reponame
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
-  unset LDFLAGS CXXFLAGS CFLAGS CPPFLAGS
-  make -C mold submodules all
+	cd $reponame
+	make -C "${srcdir}/${reponame}" -j "$(nproc)" LTO=1 SYSTEM_MIMALLOC=1
 }
 
 package() {
-  install -Dm755 mold/mold "$pkgdir/usr/bin/mold"
+	cd $reponame
+	make -C "${srcdir}/${reponame}" LTO=1 SYSTEM_MIMALLOC=1 DESTDIR="${pkgdir}" install
+	ln -snf mold "${pkgdir}/usr/bin/ld.mold"
+	# Mold checks for the lib alongside itself, which is rather silly
+	cp "${pkgdir}/usr/lib/mold/mold-wrapper.so" "${pkgdir}/usr/bin"
 }

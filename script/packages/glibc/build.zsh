@@ -2,7 +2,7 @@
 
 local ret=0
 
-git clone https://git.archlinux.org/svntogit/packages.git/ -b packages/glibc --single-branch /tmp/glibc
+git clone https://github.com/archlinux/svntogit-packages -b packages/glibc --single-branch /tmp/glibc
 sed -i 's#!strip#debug#' /tmp/glibc/repos/core-x86_64/PKGBUILD
 
 cat /etc/makepkg.conf > /tmp/glibc.makepkg.conf

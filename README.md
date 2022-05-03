@@ -10,4 +10,4 @@ GPG Key: 016DB0252B1B1F11
 
 Chinese: [中文教程](http://www.aloxaf.com/2020/06/build_aur_with_github_actions/)
 
-English: TODO...
+English: [Guide](./aur-build.md)
